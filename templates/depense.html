@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{url_for('static', filename='/css/style.css')}}">
+    <title></title>
+</head>
+<body  >
+    {% block content%}
+    {%include("partials/_logo.html")%}
+    {% endblock%}
+    <div class="form">
+        <form action="/depense" method="POST">
+    <table  >
+        <tbody >
+            <tr >
+                <td>
+                    Titre
+                </td>
+             </tr>
+            <tr>
+                <td class="td">
+                    <input type="text" name="titre" >
+                </td >
+            </tr>
+            <tr>
+                <td>
+                    Montant
+                </td>
+            </tr>
+            <tr>
+                <td class="td">
+                    <input type="text" name="montant" >
+                </td>
+            </tr>
+            <tr>
+                <td class="vert">
+                    <input   style="width:100% " type="submit" >
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</form>
+</div>
+</body>
+</html>

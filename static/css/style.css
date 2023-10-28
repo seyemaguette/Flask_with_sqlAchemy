@@ -1,0 +1,34 @@
+.vert{
+    background-color: #0C5E69 !important;
+    color:white !important;
+}
+.jaune{
+    color:#D1C000 !important;
+    text-wrap:nowrap !important; 
+}
+.tableau{
+    width: 25%;
+    box-shadow: 1px 1px 5px 5px rgb(190, 185, 185);
+}
+.gap{
+    display: flex;
+    gap: 9%;
+    margin-left: 10%;
+    margin-right: 10%;
+    justify-content: center;
+}
+.form{
+    display: flex;
+    justify-content: center;
+}
+.form input{
+    height: 30px;
+    width: 300px;
+}
+.form table{
+    border-collapse: collapse;
+    margin-top: 5%;
+}
+.form .td{
+    padding-bottom: 30px ; 
+}
