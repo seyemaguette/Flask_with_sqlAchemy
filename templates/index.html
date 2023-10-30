@@ -21,7 +21,7 @@
         </thead>
         <tbody >
             <tr >
-                <td class="td"> </td>
+                <td >{{revenu}}C CFA </td>
                 
             </tr>
         </tbody>
@@ -36,7 +36,7 @@
         </thead>
         <tbody>
             <tr>
-                <td> </td>
+                <td>{{depense}}F CFA </td>
                 
             </tr>
         </tbody>
@@ -51,7 +51,7 @@
         </thead>
         <tbody>
             <tr>
-                <td>  </td>
+                <td> {{solde}}F CFA</td>
                 
             </tr>
         </tbody>
@@ -70,14 +70,16 @@
             </tr>
         </thead>
         <tbody>
+        {%    for depense in depenseDetails%}
             <tr>
-                <td></td>
-                <td></td>
+            <td>{{depense[1]}}</td>
+            <td>{{depense[2]}}F CFA</td>
                 <td class="col-3">
-                <a class="btn btn-secondary" href="">modifier</a>
-                <a class="btn btn-danger" href="">supprimer</a>
+                <a class="btn btn-secondary" href="/updateDepense/{{depense[0]}}">modifier</a>
+                <a class="btn btn-danger" href="/deleteDepense/{{depense[0]}}">supprimer</a>
                 </td>
-            </tr>
+            </tr> 
+            {% endfor%}
             <tr>
                 <td><a class="btn btn-light" href="{{url_for('depense')}}">ajouter</a></td>
             </tr>
@@ -96,16 +98,18 @@
             </tr>
         </thead>
         <tbody>
+            {% for revenu in revenuDetails%}
             <tr>
-                <td></td>
-                <td></td>
+            <td>{{revenu[1]}}</td>
+                <td>{{revenu[2]}}F CFA</td>
                 <td class="col-3" >
-                <a class="btn btn-secondary" href="">modifier</a>
-                <a class="btn btn-danger" href="">supprimer</a>
+                <a class="btn btn-secondary" href="/updateRevenu/{{revenu[0]}}">modifier</a>
+                <a class="btn btn-danger" href="/deleteRevenu/{{revenu[0]}}">supprimer</a>
                 </td>
             </tr>
             <tr>
-                <td><a class="btn btn-light" href="">ajouter</a></td>
+            {% endfor%}
+                <td><a class="btn btn-light" href="/revenu">ajouter</a></td>
             </tr>
         </tbody>
     </table>
