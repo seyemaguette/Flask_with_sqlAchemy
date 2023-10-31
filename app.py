@@ -4,21 +4,24 @@ import sqlite3
 app=Flask(__name__)
 
 # conn = sqlite3.connect('database.db')
-# print("connecter")
+# conn.execute("""create table depense(
+#     id INTEGER PRIMARY KEY AUTOINCREMENT,
+#     titre TEXT NOT NULL,
+#     montant TEXT NOT NULL
+#     ) """)
 # conn.execute("""create table revenu(
 #     id INTEGER PRIMARY KEY AUTOINCREMENT,
-#     titre TEXT NOT NULL, 
-#     montant TEXT  NOT NULL
+#     titre TEXT NOT NULL,
+#     montant TEXT NOT NULL
 #     ) """)
-# print("table creer ave succes")
 def get_db_connection():
     conn = sqlite3.connect('database.db')
     conn.row_factory = sqlite3.Row
     return conn
- 
+
 
 @app.route("/")
-def index(): 
+def index():
     cursor=get_db_connection()
      # ------------------------------compteur des depenses--------------------------
     depense=0
@@ -41,7 +44,8 @@ def depense():
         depenseDetails=request.form
         titre=depenseDetails['titre']
         montant=depenseDetails['montant']
-        if titre!="" and montant!="":
+        montant=str(montant)
+        if titre!="" and montant.isdigit():
             cursor=get_db_connection()
             cursor.execute("INSERT INTO depense (titre, montant) VALUES(?,?)",(titre, montant))
             cursor.commit()
@@ -54,7 +58,8 @@ def revenu():
         revenuDetails=request.form
         titre= revenuDetails['titre']
         montant= revenuDetails['montant']
-        if titre!="" and montant!="":
+        montant=str(montant)
+        if titre!="" and montant.isdigit():
             cursor=get_db_connection()
             cursor.execute("INSERT INTO revenu (titre, montant) VALUES(?, ?)", (titre, montant))
             cursor.commit()
@@ -68,24 +73,28 @@ def updateDepense(id):
     updateDepense=cursor.execute("SELECT * FROM depense WHERE id= ?",(id,)).fetchone()
     if request.method=='POST':
         # ------------------------------modification des donnees----------------------------
-        titre=request.form['titre'] 
+        titre=request.form['titre']
         montant=request.form['montant']
-        cursor.execute("UPDATE depense SET titre= ?, montant= ?  WHERE id= ? ",(titre, montant, id))
-        cursor.commit()
-        return redirect("/")
+        montant=str(montant)
+        if titre!="" and montant.isdigit():
+            cursor.execute("UPDATE depense SET titre= ?, montant= ?  WHERE id= ? ",(titre, montant, id))
+            cursor.commit()
+            return redirect("/")
     return render_template("updateDepense.html",updateDepense=updateDepense)
- 
-@app.route("/updateRevenu/<int:id>", methods=['GET', 'POST'])           
+
+@app.route("/updateRevenu/<int:id>", methods=['GET', 'POST'])
 def updateRevenu(id):
     cursor=get_db_connection()
     updateRevenu=cursor.execute("SELECT * FROM revenu WHERE id= ?",(id,)).fetchone()
     if request.method=='POST':
         # ------------------------------modification des donnees----------------------------
-        titre=request.form['titre'] 
+        titre=request.form['titre']
         montant=request.form['montant']
-        cursor.execute("UPDATE revenu SET titre= ?, montant= ?  WHERE id= ? ",(titre, montant, id))
-        cursor.commit()
-        return redirect("/")
+        montant=str(montant)
+        if titre!="" and montant.isdigit():
+            cursor.execute("UPDATE revenu SET titre= ?, montant= ?  WHERE id= ? ",(titre, montant, id))
+            cursor.commit()
+            return redirect("/")
     return render_template("updateRevenu.html",updateRevenu=updateRevenu)
 
 
@@ -96,7 +105,7 @@ def deleteDepense(id):
     cursor.execute("DELETE FROM depense WHERE id= ?",(id,))
     cursor.commit()
     return redirect("/")
-            
+
 
 @app.route("/deleteRevenu/<int:id>")
 def deleteRevenu(id):
@@ -105,9 +114,10 @@ def deleteRevenu(id):
     cursor.execute("DELETE FROM revenu WHERE id= ?",(id,))
     cursor.commit()
     return redirect("/")
-            
-            
-            
+
+
+
 if __name__=="__main__":
+
     app.run(debug=True)
 
