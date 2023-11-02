@@ -7,7 +7,7 @@ app=Flask(__name__)
 # conn.execute("""create table depense(
 #     id INTEGER PRIMARY KEY AUTOINCREMENT,
 #     titre TEXT NOT NULL,
-#     montant INTEGER NOT NULL  
+#     montant INTEGER NOT NULL
 #     ) """)
 # conn.execute("""create table revenu(
 #     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -40,30 +40,41 @@ def index():
 
 @app.route("/depense", methods=['GET', 'POST'])
 def depense():
+    error_message=""
     if request.method=='POST':
-        revenu=0
-        cursor=get_db_connection()
-        revenuDetails=cursor.execute("SELECT * FROM revenu").fetchall()
-        for revenus in revenuDetails:
-           revenu+=revenus[2]
-        error_message=""
         depenseDetails=request.form
         titre=depenseDetails['titre']
         montant=depenseDetails['montant']
+        # ------------------le titre ne doit pas vide et le montant ne doit pas contenir des caracteres------------------
         if montant.isdigit() and  titre!="":
             montant=int(montant)
-            if montant<revenu:
+            # -----------------------le montant ne doit pas etre nul-------------------------------------------------
+            if montant>0:
                 cursor=get_db_connection()
-                cursor.execute("INSERT INTO depense (titre, montant) VALUES(?,?)",(titre, montant))
-                cursor.commit()
-                return redirect('/')
+                revenu=0
+                cursor=get_db_connection()
+                revenuDetails=cursor.execute("SELECT * FROM revenu").fetchall()
+                for revenus in revenuDetails:
+                    revenu+=revenus[2]
+                depense=0
+                depenseDetails=cursor.execute("SELECT * FROM depense").fetchall()
+                for depenses in depenseDetails:
+                    depense+=depenses[2]
+                solde=revenu -depense
+                # ---------------------depense ne doit pas etre superieur au solde-----------------------------
+                if montant<=solde:
+                    cursor.execute("INSERT INTO depense (titre, montant) VALUES(?,?)",(titre, montant))
+                    cursor.commit()
+                    return redirect('/')
+                else:
+                    error_message=" la depense est superieur a votre budget"
             else:
-                error_message=" la depense est superieur a votre budget"
-                return render_template("depense.html", error_message=error_message)
+                error_message="la depense doit etre superieure à 0 !!! "
+
         else:
-           error_message="le titre  et montant doivent  etre valide !!! "
-           return render_template("depense.html", error_message=error_message)
-    return render_template("depense.html")
+                error_message="le titre  et montant doivent  etre valide !!! "
+
+    return render_template("depense.html", error_message=error_message)
 
 @app.route("/revenu",methods=['GET','POST'])
 def revenu():
@@ -72,8 +83,10 @@ def revenu():
         revenuDetails=request.form
         titre= revenuDetails['titre']
         montant= revenuDetails['montant']
+        # ------------------le titre ne doit pas vide et le montant ne doit pas contenir des caracteres------------------
         if montant.isdigit() and titre!="":
             montant=int(montant)
+            # -----------------------le montant ne doit pas etre nul-------------------------------------------------
             if  montant>0:
                 cursor=get_db_connection()
                 cursor.execute("INSERT INTO revenu (titre, montant) VALUES(?, ?)", (titre, montant))
@@ -82,64 +95,100 @@ def revenu():
                 return redirect("/")
             else:
                 error_message=" le revenu doit etre superieur à 0 "
-                return render_template("revenu.html",error_message=error_message)    
+
         else:
             error_message="le titre  et montant doivent  etre valide !!! "
-            return render_template("revenu.html",error_message=error_message)
-    return render_template("revenu.html")
+
+    return render_template("revenu.html",error_message=error_message)
 
 
 @app.route("/updateDepense/<int:id>", methods=['GET','POST'])
 def updateDepense(id):
     cursor=get_db_connection()
     updateDepense=cursor.execute("SELECT * FROM depense WHERE id= ?",(id,)).fetchone()
+    montantdelete=updateDepense[2]
+    error_message=""
     if request.method=='POST':
-        # ------------------------------modification des donnees----------------------------
-        revenu=0
-        cursor=get_db_connection()
-        revenuDetails=cursor.execute("SELECT * FROM revenu").fetchall()
-        for revenus in revenuDetails:
-           revenu+=revenus[2]
-        error_message=""
         titre=request.form['titre']
-        montant=request.form['montant'] 
+        montant=request.form['montant']
+        # ------------------------------modification des donnees----------------------------
+
+
+
+        # ------------------le titre ne doit pas vide et le montant ne doit pas contenir des caracteres------------------
         if montant.isdigit() and  titre!="":
             montant=int(montant)
-            if montant<revenu:
-               cursor.execute("UPDATE depense SET titre= ?, montant= ?  WHERE id= ? ",(titre, montant, id))
-               cursor.commit()
-               return redirect("/")
+            # -----------------------le montant ne doit pas etre nul-------------------------------------------------
+            if montant>0:
+                revenu=0
+                revenuDetails=cursor.execute("SELECT * FROM revenu").fetchall()
+                for revenus in revenuDetails:
+                    revenu+=revenus[2]
+
+                depense=0
+                depenseDetails=cursor.execute("SELECT * FROM depense").fetchall()
+                for depenses in depenseDetails:
+                    depense+=depenses[2]
+                depense-=montantdelete
+                depense +=montant
+                solde=revenu -depense
+                # ---------------------depense ne doit pas etre superieur au solde-----------------------------
+                if solde>=0:
+                    cursor.execute("UPDATE depense SET titre= ?, montant= ?  WHERE id= ? ",(titre, montant, id))
+                    cursor.commit()
+                    return redirect("/")
+                else:
+                    error_message=" la depense est superieur a votre budget"
+
             else:
-                error_message=" la depense est superieur a votre budget"
-                return render_template("updateDepense.html",updateDepense=updateDepense,error_message=error_message)
+                error_message="la depense doit etre superieure à 0 !!! "
+
+
         else:
            error_message="le titre  et montant doivent  etre valide !!! "
-           return render_template("updateDepense.html",updateDepense=updateDepense,error_message=error_message)       
-    return render_template("updateDepense.html",updateDepense=updateDepense)
+
+    return render_template("updateDepense.html",updateDepense=updateDepense, error_message=error_message)
 
 @app.route("/updateRevenu/<int:id>", methods=['GET', 'POST'])
 def updateRevenu(id):
+    error_message=""
     cursor=get_db_connection()
     updateRevenu=cursor.execute("SELECT * FROM revenu WHERE id= ?",(id,)).fetchone()
+    montantdelete=updateRevenu[2]
     if request.method=='POST':
         # ------------------------------modification des donnees----------------------------
         titre=request.form['titre']
         montant=request.form['montant']
-        error_message=""
-        if montant.isdigit() and titre!="":
+        # ------------------le titre ne doit pas vide et le montant ne doit pas contenir des caracteres------------------
+        if montant.isdigit() and titre!="" :
             montant=int(montant)
-            if  montant>0:
-                cursor.execute("UPDATE revenu SET titre= ?, montant= ?  WHERE id= ? ",(titre, montant, id))
-                cursor.commit()
-                return redirect("/")
+            # -----------------------le montant ne doit pas etre nul-------------------------------------------------
+            if montant>0:
+                revenu=0
+                revenuDetails=cursor.execute("SELECT * FROM revenu").fetchall()
+                for revenus in revenuDetails:
+                        revenu+=revenus[2]
+                revenu-=montantdelete
+                revenu +=montant
+                depense=0
+                depenseDetails=cursor.execute("SELECT * FROM depense").fetchall()
+                for depenses in depenseDetails:
+                    depense+=depenses[2]
+
+                solde=revenu -depense
+
+                # ---------------------depense ne doit pas etre superieur au solde-----------------------------
+                if  solde>=0 :
+                    cursor.execute("UPDATE revenu SET titre= ?, montant= ?  WHERE id= ? ",(titre, montant, id))
+                    cursor.commit()
+                    return redirect("/")
+                else:
+                    error_message="vous ne pouvez reduire le montant car votre solde sera negatif!!! "
             else:
-                error_message=" le revenu doit etre superieur à 0 "
-                return render_template("revenu.html", updateRevenu=updateRevenu, error_message=error_message)    
+                error_message="le revenu de doit pas etre nul !!! "
         else:
             error_message="le titre  et montant doivent  etre valide !!! "
-            return render_template("revenu.html", updateRevenu=updateRevenu, error_message=error_message)
-  
-    return render_template("updateRevenu.html",updateRevenu=updateRevenu)
+    return render_template("updateRevenu.html", updateRevenu=updateRevenu, error_message=error_message)
 
 
 @app.route("/deleteDepense/<int:id>")
@@ -154,9 +203,24 @@ def deleteDepense(id):
 @app.route("/deleteRevenu/<int:id>")
 def deleteRevenu(id):
     # ------------------suppression des donnees-----------------
+
     cursor=get_db_connection()
-    cursor.execute("DELETE FROM revenu WHERE id= ?",(id,))
-    cursor.commit()
+    Revenu=cursor.execute("SELECT * FROM revenu WHERE id= ?",(id,)).fetchone()
+    montantdelete=Revenu[2]
+    revenu=0
+    cursor=get_db_connection()
+    revenuDetails=cursor.execute("SELECT * FROM revenu").fetchall()
+    for revenus in revenuDetails:
+          revenu+=revenus[2]
+    revenu-=montantdelete
+    depense=0
+    depenseDetails=cursor.execute("SELECT * FROM depense").fetchall()
+    for depenses in depenseDetails:
+          depense+=depenses[2]
+    solde=revenu -depense
+    if solde>=0:
+        cursor.execute("DELETE FROM revenu WHERE id= ?",(id,))
+        cursor.commit()
     return redirect("/")
 
 
