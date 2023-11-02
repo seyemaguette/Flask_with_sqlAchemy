@@ -44,5 +44,10 @@
     </table>
 </form>
 </div>
+{%if error_message %}
+    <div class="form" style="margin-top:50px; color:red">
+        {{error_message}}
+      </div>
+{% endif %}
 </body>
 </html>

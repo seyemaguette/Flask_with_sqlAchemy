@@ -7,12 +7,12 @@ app=Flask(__name__)
 # conn.execute("""create table depense(
 #     id INTEGER PRIMARY KEY AUTOINCREMENT,
 #     titre TEXT NOT NULL,
-#     montant TEXT NOT NULL
+#     montant INTEGER NOT NULL  
 #     ) """)
 # conn.execute("""create table revenu(
 #     id INTEGER PRIMARY KEY AUTOINCREMENT,
 #     titre TEXT NOT NULL,
-#     montant TEXT NOT NULL
+#     montant INTEGER NOT NULL
 #     ) """)
 def get_db_connection():
     conn = sqlite3.connect('database.db')
@@ -27,12 +27,12 @@ def index():
     depense=0
     depenseDetails=cursor.execute("SELECT * FROM depense").fetchall()
     for depenses in depenseDetails:
-        depense+=int(depenses[2])
+        depense+=depenses[2]
     # ------------------------------compteur des revenus (budget)-----------------------------
     revenu=0
     revenuDetails=cursor.execute("SELECT * FROM revenu").fetchall()
     for revenus in revenuDetails:
-        revenu+=int(revenus[2])
+        revenu+=revenus[2]
     # ------------------------------le solde-------------------------
     solde= revenu -depense
     return render_template("index.html", depenseDetails=depenseDetails, revenuDetails=revenuDetails, revenu=revenu, depense=depense, solde=solde)
@@ -41,31 +41,53 @@ def index():
 @app.route("/depense", methods=['GET', 'POST'])
 def depense():
     if request.method=='POST':
+        revenu=0
+        cursor=get_db_connection()
+        revenuDetails=cursor.execute("SELECT * FROM revenu").fetchall()
+        for revenus in revenuDetails:
+           revenu+=revenus[2]
+        error_message=""
         depenseDetails=request.form
         titre=depenseDetails['titre']
         montant=depenseDetails['montant']
-        montant=str(montant)
-        if titre!="" and montant.isdigit():
-            cursor=get_db_connection()
-            cursor.execute("INSERT INTO depense (titre, montant) VALUES(?,?)",(titre, montant))
-            cursor.commit()
-            return redirect('/')
+        if montant.isdigit() and  titre!="":
+            montant=int(montant)
+            if montant<revenu:
+                cursor=get_db_connection()
+                cursor.execute("INSERT INTO depense (titre, montant) VALUES(?,?)",(titre, montant))
+                cursor.commit()
+                return redirect('/')
+            else:
+                error_message=" la depense est superieur a votre budget"
+                return render_template("depense.html", error_message=error_message)
+        else:
+           error_message="le titre  et montant doivent  etre valide !!! "
+           return render_template("depense.html", error_message=error_message)
     return render_template("depense.html")
 
 @app.route("/revenu",methods=['GET','POST'])
 def revenu():
+    error_message=""
     if request.method=='POST':
         revenuDetails=request.form
         titre= revenuDetails['titre']
         montant= revenuDetails['montant']
-        montant=str(montant)
-        if titre!="" and montant.isdigit():
-            cursor=get_db_connection()
-            cursor.execute("INSERT INTO revenu (titre, montant) VALUES(?, ?)", (titre, montant))
-            cursor.commit()
-            cursor.close()
-            return redirect("/")
+        if montant.isdigit() and titre!="":
+            montant=int(montant)
+            if  montant>0:
+                cursor=get_db_connection()
+                cursor.execute("INSERT INTO revenu (titre, montant) VALUES(?, ?)", (titre, montant))
+                cursor.commit()
+                cursor.close()
+                return redirect("/")
+            else:
+                error_message=" le revenu doit etre superieur à 0 "
+                return render_template("revenu.html",error_message=error_message)    
+        else:
+            error_message="le titre  et montant doivent  etre valide !!! "
+            return render_template("revenu.html",error_message=error_message)
     return render_template("revenu.html")
+
 
 @app.route("/updateDepense/<int:id>", methods=['GET','POST'])
 def updateDepense(id):
@@ -73,13 +95,26 @@ def updateDepense(id):
     updateDepense=cursor.execute("SELECT * FROM depense WHERE id= ?",(id,)).fetchone()
     if request.method=='POST':
         # ------------------------------modification des donnees----------------------------
+        revenu=0
+        cursor=get_db_connection()
+        revenuDetails=cursor.execute("SELECT * FROM revenu").fetchall()
+        for revenus in revenuDetails:
+           revenu+=revenus[2]
+        error_message=""
         titre=request.form['titre']
-        montant=request.form['montant']
-        montant=str(montant)
-        if titre!="" and montant.isdigit():
-            cursor.execute("UPDATE depense SET titre= ?, montant= ?  WHERE id= ? ",(titre, montant, id))
-            cursor.commit()
-            return redirect("/")
+        montant=request.form['montant'] 
+        if montant.isdigit() and  titre!="":
+            montant=int(montant)
+            if montant<revenu:
+               cursor.execute("UPDATE depense SET titre= ?, montant= ?  WHERE id= ? ",(titre, montant, id))
+               cursor.commit()
+               return redirect("/")
+            else:
+                error_message=" la depense est superieur a votre budget"
+                return render_template("updateDepense.html",updateDepense=updateDepense,error_message=error_message)
+        else:
+           error_message="le titre  et montant doivent  etre valide !!! "
+           return render_template("updateDepense.html",updateDepense=updateDepense,error_message=error_message)       
     return render_template("updateDepense.html",updateDepense=updateDepense)
 
 @app.route("/updateRevenu/<int:id>", methods=['GET', 'POST'])
@@ -90,11 +125,20 @@ def updateRevenu(id):
         # ------------------------------modification des donnees----------------------------
         titre=request.form['titre']
         montant=request.form['montant']
-        montant=str(montant)
-        if titre!="" and montant.isdigit():
-            cursor.execute("UPDATE revenu SET titre= ?, montant= ?  WHERE id= ? ",(titre, montant, id))
-            cursor.commit()
-            return redirect("/")
+        error_message=""
+        if montant.isdigit() and titre!="":
+            montant=int(montant)
+            if  montant>0:
+                cursor.execute("UPDATE revenu SET titre= ?, montant= ?  WHERE id= ? ",(titre, montant, id))
+                cursor.commit()
+                return redirect("/")
+            else:
+                error_message=" le revenu doit etre superieur à 0 "
+                return render_template("revenu.html", updateRevenu=updateRevenu, error_message=error_message)    
+        else:
+            error_message="le titre  et montant doivent  etre valide !!! "
+            return render_template("revenu.html", updateRevenu=updateRevenu, error_message=error_message)
+  
     return render_template("updateRevenu.html",updateRevenu=updateRevenu)
 
 

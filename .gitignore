@@ -1,6 +1,8 @@
+#lien de site de mon projet2
+#https://seyemax.pythonanywhere.com/
+
 # Created by https://www.toptal.com/developers/gitignore/api/flask,python
 # Edit at https://www.toptal.com/developers/gitignore?templates=flask,python
-
 ### Flask ###
 instance/*
 !instance/.gitignore
