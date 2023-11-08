@@ -70,13 +70,13 @@
             </tr>
         </thead>
         <tbody>
-        {%    for depense in depenseDetails%}
+        {%    for depense in depense_details%}
             <tr>
-            <td>{{depense[1]}}</td>
-            <td>{{depense[2]}}F CFA</td>
+            <td>{{depense.titre}}</td>
+            <td>{{depense.montant}}F CFA</td>
                 <td class="col-3">
-                <a class="btn btn-secondary" href="/updateDepense/{{depense[0]}}">modifier</a>
-                <a class="btn btn-danger" href="/deleteDepense/{{depense[0]}}">supprimer</a>
+                <a class="btn btn-secondary" href="/update_depense/{{depense.id}}">modifier</a>
+                <a class="btn btn-danger" href="/delete_depense/{{depense.id}}">supprimer</a>
                 </td>
             </tr> 
             {% endfor%}
@@ -98,13 +98,13 @@
             </tr>
         </thead>
         <tbody>
-            {% for revenu in revenuDetails%}
+            {% for revenu in revenu_details%}
             <tr>
-            <td>{{revenu[1]}}</td>
-                <td>{{revenu[2]}}F CFA</td>
+            <td>{{revenu.titre}}</td>
+                <td>{{revenu.montant}}F CFA</td>
                 <td class="col-3" >
-                <a class="btn btn-secondary" href="/updateRevenu/{{revenu[0]}}">modifier</a>
-                <a class="btn btn-danger" href="/deleteRevenu/{{revenu[0]}}">supprimer</a>
+                <a class="btn btn-secondary" href="/update_revenu/{{revenu.id}}">modifier</a>
+                <a class="btn btn-danger" href="/delete_revenu/{{revenu.id}}">supprimer</a>
                 </td>
             </tr>
             <tr>

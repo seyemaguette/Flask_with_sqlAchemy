@@ -12,7 +12,7 @@
     {% endblock%}
     
     <div class="form">
-        <form action="/updateRevenu/{{updateRevenu[0]}}" method="POST">
+        <form  method="POST">
     <table  >
         <tbody >
             <tr >
@@ -22,7 +22,7 @@
              </tr>
             <tr>
                 <td class="td">
-                    <input type="text" name="titre" value={{updateRevenu[1]}}>
+                    <input type="text" name="titre" value={{update_depense.titre}}>
                 </td >
             </tr>
             <tr>
@@ -32,12 +32,12 @@
             </tr>
             <tr>
                 <td class="td">
-                    <input type="text" name="montant" value={{updateRevenu[2]}}>
+                    <input type="text" name="montant" value={{update_depense.montant}}>
                 </td>
             </tr>
             <tr>
                 <td >
-                    <input  value="modifier" style="width:100% ;cursor:pointer" type="submit"  class="vert">
+                    <input  value="modifier" style="width:100% ; cursor:pointer" type="submit"  class="vert">
                 </td>
             </tr>
         </tbody>
